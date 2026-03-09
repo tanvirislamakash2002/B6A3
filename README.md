@@ -101,7 +101,7 @@ The ERD includes:
 - Status fields such as booking status and vehicle availability.
 
 ERD Link:  
-(Add your ERD link here)
+(https://lucid.app/lucidchart/ece5505f-394f-4a4f-9d0c-258bdedd6480/edit?viewport_loc=-441%2C527%2C1542%2C707%2C0_0&invitationId=inv_10236520-df49-4f7d-8999-8878b232b8f5)
 
 ---
 
@@ -113,14 +113,17 @@ All SQL queries are stored in the `queries.sql` file.
 Retrieve booking information along with customer name and vehicle name.
 
 ```sql
-SELECT 
-    users.name AS customer_name,
-    vehicles.vehicle_name,
-    bookings.start_date,
-    bookings.end_date
-FROM bookings
-INNER JOIN users ON bookings.user_id = users.user_id
-INNER JOIN vehicles ON bookings.vehicle_id = vehicles.vehicle_id;
+select
+  booking_id,
+  u.name as customer_name,
+  v.name as vehicle_name,
+  start_date,
+  end_date,
+  b.status
+from
+  bookings as b
+  inner join users as u on b.user_id = u.user_id
+  inner join vehicles as v on b.vehicle_id = v.vehicle_id
 ```
 
 ---
@@ -129,13 +132,22 @@ INNER JOIN vehicles ON bookings.vehicle_id = vehicles.vehicle_id;
 Find all vehicles that have never been booked.
 
 ```sql
-SELECT *
-FROM vehicles v
-WHERE NOT EXISTS (
-    SELECT 1
-    FROM bookings b
-    WHERE b.vehicle_id = v.vehicle_id
-);
+select
+  v.vehicle_id,
+  v.name as name,
+  type,
+  model,
+  registration_number,
+  rental_price,
+  v.status
+from
+  vehicles as v
+  where 
+  not exists (
+    select 1
+    from bookings b
+    where b.vehicle_id = v.vehicle_id
+  );
 ```
 
 ---
@@ -144,10 +156,12 @@ WHERE NOT EXISTS (
 Retrieve all available vehicles of a specific type (Car).
 
 ```sql
-SELECT *
-FROM vehicles
-WHERE type = 'Car'
-AND availability_status = 'Available';
+select
+  *
+from
+  vehicles
+where
+  type = 'car' and status = 'available'
 ```
 
 ---
@@ -156,12 +170,17 @@ AND availability_status = 'Available';
 Find the total number of bookings for each vehicle and display only vehicles with more than 2 bookings.
 
 ```sql
-SELECT 
-    vehicle_id,
-    COUNT(*) AS total_bookings
-FROM bookings
-GROUP BY vehicle_id
-HAVING COUNT(*) > 2;
+select
+  v.name as vehicle_name,
+  count(b.vehicle_id) as total_bookings
+from
+  bookings as b
+  join vehicles as v on b.vehicle_id = v.vehicle_id
+group by
+  b.vehicle_id,
+  v.name
+having
+  count(b.vehicle_id) > 2
 ```
 
 ---
@@ -176,20 +195,3 @@ vehicle-rental-system/
 ```
 
 ---
-
-## Submission Links
-
-GitHub Repository:  
-(Add your GitHub repository link)
-
-ERD Link:  
-(Add your ERD link)
-
-Viva Video Link:  
-(Add your video link)
-
----
-
-## Academic Integrity
-
-This project was completed as part of an academic assignment. All work submitted must be original. Any form of plagiarism may result in zero marks.
